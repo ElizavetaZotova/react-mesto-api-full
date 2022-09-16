@@ -9,21 +9,58 @@ const { ERR_DEFAULT } = require('./const/errors');
 const NotFound = require('./errors/not-found');
 
 const { login, createUser } = require('./controllers/users');
+
 const { loginValidationSchema, createUserValidationSchema } = require('./middlewares/validators');
 const auth = require('./middlewares/auth');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
+
 const userRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
 const { PORT = 3000 } = process.env;
 
+const allowedCors = [
+  'http://localhost:3001',
+  'localhost:3000',
+];
+
 const app = express();
+
+// eslint-disable-next-line consistent-return
+app.use((req, res, next) => {
+  const { origin } = req.headers;
+  const { method } = req;
+  const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
+  const requestHeaders = req.headers['access-control-request-headers'];
+
+  if (allowedCors.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
+  if (method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Methods', DEFAULT_ALLOWED_METHODS);
+    res.header('Access-Control-Allow-Headers', requestHeaders);
+
+    return res.status(200).send();
+  }
+
+  next();
+});
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cookieParser());
+app.use(requestLogger);
 
 app.use(morgan('tiny'));
+
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
 
 app.post('/signin', loginValidationSchema, login);
 app.post('/signup', createUserValidationSchema, createUser);
@@ -46,6 +83,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
 });
 
+app.use(errorLogger);
 app.use(errors());
 
 app.use((err, req, res, next) => {

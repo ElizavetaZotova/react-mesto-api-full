@@ -7,7 +7,8 @@ import BaseApi from './base-api';
 class Api extends BaseApi {
   getInitialCards() {
     return fetch(`${this._baseUrl}/cards`, {
-      headers: this._headers
+      headers: this._headers,
+      credentials: 'include',
     }).then(this._checkResponse);
   }
 
@@ -16,6 +17,7 @@ class Api extends BaseApi {
       headers: this._headers,
       method: 'POST',
       body: JSON.stringify(card),
+      credentials: 'include',
     }).then(this._checkResponse);
   }
 
@@ -23,6 +25,7 @@ class Api extends BaseApi {
     return fetch(`${this._baseUrl}/cards/${cardId}`, {
       headers: this._headers,
       method: 'DELETE',
+      credentials: 'include',
     }).then(this._checkResponse);
   }
 
@@ -38,6 +41,7 @@ class Api extends BaseApi {
     return fetch(`${this._baseUrl}/cards/${cardId}/likes `, {
       headers: this._headers,
       method: 'PUT',
+      credentials: 'include',
     }).then(this._checkResponse);
   }
 
@@ -45,12 +49,14 @@ class Api extends BaseApi {
     return fetch(`${this._baseUrl}/cards/${cardId}/likes `, {
       headers: this._headers,
       method: 'DELETE',
+      credentials: 'include',
     }).then(this._checkResponse);
   }
 
   getUserInfo() {
     return fetch(`${this._baseUrl}/users/me `, {
-      headers: this._headers
+      headers: this._headers,
+      credentials: 'include',
     }).then(this._checkResponse);
   }
 
@@ -59,6 +65,7 @@ class Api extends BaseApi {
       method: 'PATCH',
       headers: this._headers,
       body: JSON.stringify(info),
+      credentials: 'include',
     }).then(this._checkResponse);
   }
 
@@ -67,6 +74,7 @@ class Api extends BaseApi {
       method: 'PATCH',
       headers: this._headers,
       body: JSON.stringify({ avatar }),
+      credentials: 'include',
     }).then(this._checkResponse);
   }
 }

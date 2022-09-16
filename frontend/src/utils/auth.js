@@ -16,26 +16,24 @@ class AuthApi extends BaseApi {
       method: 'POST',
       headers: this._headers,
       body: JSON.stringify({password, email}),
+      credentials: 'include',
     })
     .then(this._checkResponse)
-    .then((data) => {
-      if (data.token) {
-        localStorage.setItem('jwt', data.token);
-
-        return data.token;
-      }
+    .then((res) => {
+      return res.data;
     })
   }
 
-  getUserByToken(token) {
-    return fetch(`${this._baseUrl}/users/me`, {
+  logout() {
+    return fetch(`${this._baseUrl}/signout`, {
       method: 'GET',
-      headers: {
-        authorization: `Bearer ${token}`,
-        ...this._headers,
-      }
+      headers: this._headers,
+      credentials: 'include',
     })
-    .then(this._checkResponse);
+    .then(this._checkResponse)
+    .then((res) => {
+      return res.data;
+    })
   }
 }
 

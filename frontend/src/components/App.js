@@ -80,7 +80,9 @@ function App() {
     const isLiked = card.likes.some(i => i._id === currentUser._id);
 
     api.changeLikeCardStatus(card._id, !isLiked)
-      .then((newCard) => {
+      .then((res) => {
+        const newCard = res.data;
+
         setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
       })
       .catch((err) => console.log(err));
@@ -98,8 +100,8 @@ function App() {
     setIsEditProfileLoading(true);
 
     api.updateUserInfo(userInfo)
-      .then((data) => {
-        setCurrentUser(data);
+      .then((res) => {
+        setCurrentUser(res.data);
         resetLoadingStates();
         closeAllPopups();
       })
@@ -110,8 +112,8 @@ function App() {
     setIsEditAvatarLoading(true);
 
     api.updateUserAvatar(avatar)
-      .then((data) => {
-        setCurrentUser(data);
+      .then((res) => {
+        setCurrentUser(res.data);
         resetLoadingStates();
         closeAllPopups();
       })
@@ -122,7 +124,9 @@ function App() {
     setIsAddPlaceLoading(true);
 
     api.addCard(placeData)
-      .then((newCard) => {
+      .then((res) => {
+        const newCard = res.data;
+
         setCards([newCard, ...cards]);
         resetLoadingStates();
         closeAllPopups();
@@ -132,31 +136,25 @@ function App() {
 
 
   React.useEffect(() => {
-    checkToken();
+    checkAuth();
   }, []);
 
   function loadUserData() {
     api.getUserInfo()
-      .then((data) => {
-        setCurrentUser(data);
+      .then((res) => {
+        setCurrentUser(res.data);
       })
       .catch((err) => console.log(err));
 
     api.getInitialCards()
-      .then((data) => {
-        setCards(data);
+      .then((res) => {
+        setCards(res.data);
       })
       .catch((err) => console.log(err));
   }
 
-  function checkToken() {
-    const jwt = localStorage.getItem('jwt');
-
-    if (!jwt) {
-      return;
-    }
-
-    auth.getUserByToken(jwt)
+  function checkAuth() {
+    api.getUserInfo()
       .then((res) => {
         if (res) {
           setLoggedIn(true);
@@ -166,12 +164,21 @@ function App() {
           history.push('/');
         }
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+        setLoggedIn(false);
+      });
   }
 
   function onSignOut() {
-    localStorage.removeItem('jwt');
-    setLoggedIn(false);
+    auth.logout()
+      .then(() => {
+        setLoggedIn(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoggedIn(false);
+      });
   }
 
   function onRegistration(password, email) {
@@ -186,7 +193,7 @@ function App() {
 
   function onLogin(password, email) {
     auth.authorize(password, email)
-      .then(() => checkToken())
+      .then(() => checkAuth())
       .catch(() => {
         setMessage({ img: failImage, text: 'Неверный логин или пароль.' });
         setIsInfoTooltipOpen(true);
