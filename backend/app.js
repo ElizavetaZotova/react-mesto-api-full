@@ -21,6 +21,7 @@ const cardsRouter = require('./routes/cards');
 const { PORT = 3000 } = process.env;
 
 const allowedCors = [
+  'http://liza.nomoredomains.sbs',
   'https://liza.nomoredomains.sbs',
   'http://localhost:3001',
   'http://51.250.96.186',
